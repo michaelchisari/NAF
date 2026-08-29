@@ -1,0 +1,4 @@
+model: ollama/qwen3.8:latest
+read:
+  - AIDER.md
+chat-mode: ask
