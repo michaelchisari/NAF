@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/fs"
 	"log"
+	"log/slog"
 	"net/http"
 	"path"
 	"strings"
@@ -95,19 +96,22 @@ func handleHubAtRoot(w http.ResponseWriter, r *http.Request) {
 func handleNavigationPage(w http.ResponseWriter, r *http.Request) {
 	headerNavComponent, ok := tplComponents["header_nav"]
 	if !ok {
-		fmt.Fprint(w, "Could not find component: header_nav")
+		slog.Error("Could not find component: header_nav")
+		http.Error(w, "Could not find component: header_nav", 500)
 		return
 	}
 
 	navigationPage, ok := tplPages["navigation"]
 	if !ok {
-		fmt.Fprint(w, "Could not find component: navigation")
+		slog.Error("Could not find component: navigation")
+		http.Error(w, "Could not find page: navigation", 500)
 		return
 	}
 
 	baseLayout, ok := tplLayouts["base"]
 	if !ok {
-		fmt.Fprint(w, "Could not find layout: base")
+		slog.Error("Could not find component: base")
+		http.Error(w, "Could not find layout: base", 500)
 		return
 	}
 
