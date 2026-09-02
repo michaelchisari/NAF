@@ -13,7 +13,7 @@ import (
 )
 
 const SERVER_PORT = ":9003"
-const TPL_OPEN = "<? "
+const TPL_OPEN = "<?= "
 const TPL_CLOSE = " ?>"
 
 //go:embed templates/pages/*
@@ -23,6 +23,10 @@ var tplPages = make(map[string]string)
 //go:embed templates/components/*
 var tplComponentsFiles embed.FS
 var tplComponents = make(map[string]string)
+
+//go:embed templates/layouts/*
+var tplLayoutsFiles embed.FS
+var tplLayouts = make(map[string]string)
 
 func init() {
 	// Pages
@@ -57,6 +61,23 @@ func init() {
 		fmt.Println("INDEX:", i)
 		tplComponents[i] = string(componentContent)
 	}
+
+	// Layouts
+	layouts, err := fs.Glob(tplLayoutsFiles, "templates/layouts/*.html")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, layoutPath := range layouts {
+		layoutContent, err := tplLayoutsFiles.ReadFile(layoutPath)
+		if err != nil {
+			log.Fatalf("Error reading embedded files: %s: %v\n", layoutPath, err)
+		}
+		p := path.Base(layoutPath)
+		i := strings.TrimSuffix(p, ".html")
+		fmt.Println("INDEX:", i)
+		tplLayouts[i] = string(layoutContent)
+	}
 }
 
 func main() {
@@ -76,12 +97,18 @@ func handleHubAtRoot(w http.ResponseWriter, r *http.Request) {
 func handleNavigationPage(w http.ResponseWriter, r *http.Request) {
 	headerNavComponent := tplComponents["header_nav"]
 	navigationPage := tplPages["navigation"]
+	baseLayout := tplLayouts["base"]
 
 	t := fasttemplate.New(navigationPage, TPL_OPEN, TPL_CLOSE)
-	s := t.ExecuteString(map[string]any{
+	n := t.ExecuteString(map[string]any{
 		"header_nav": headerNavComponent,
 	})
 
+	t = fasttemplate.New(baseLayout, TPL_OPEN, TPL_CLOSE)
+	b := t.ExecuteString(map[string]any{
+		"page": n,
+	})
+
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	fmt.Fprint(w, s)
+	fmt.Fprint(w, b)
 }
