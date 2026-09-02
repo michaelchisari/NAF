@@ -95,7 +95,14 @@ func main() {
 	mux.Handle("/static/", http.StripPrefix("/static", http.FileServer(http.FS(subFS))))
 
 	mux.HandleFunc("/", handleHubAtRoot)
-	mux.HandleFunc("/navigation", handleNavigationPage)
+	mux.HandleFunc("/elements", handleTodoPage)         // Tabs, accordions, dialogs, toasts (solved but not widely known)
+	mux.HandleFunc("/navigation", handleNavigationPage) // smooth navigation across pages
+	mux.HandleFunc("/infinite", handleTodoPage)         // infinite scroll
+	mux.HandleFunc("/search", handleTodoPage)           // live search
+	mux.HandleFunc("/tables", handleTodoPage)           // filterable/sortable tables
+	mux.HandleFunc("/photos", handleTodoPage)           // photo album
+	mux.HandleFunc("/wizard", handleTodoPage)           // form wizard
+	mux.HandleFunc("/shopping", handleTodoPage)         // shopping site
 
 	// Use mkcert for a trusted local cert
 	// https://github.com/filosottile/mkcert
@@ -158,4 +165,8 @@ func handleNavigationPage(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	fmt.Fprint(w, b)
+}
+
+func handleTodoPage(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(w, "Hub")
 }
