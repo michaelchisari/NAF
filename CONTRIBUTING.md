@@ -1,4 +1,4 @@
-# Contributing to Batchqlite
+# Contributing to NAF
 
 The rules are simple (for now).
 
