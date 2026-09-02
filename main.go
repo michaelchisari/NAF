@@ -1,12 +1,15 @@
 package main
 
 import (
+	"crypto/tls"
 	"embed"
+	"errors"
 	"fmt"
 	"io/fs"
 	"log"
 	"log/slog"
 	"net/http"
+	"os"
 	"path"
 	"strings"
 
@@ -98,8 +101,20 @@ func main() {
 	// https://github.com/filosottile/mkcert
 	//
 	// Use http/2 by default
+	const CERTFILE = "server.crt"
+	const KEYFILE = "server.key"
+	// Pre-validate the certificate and key pair
+	_, err = tls.LoadX509KeyPair(CERTFILE, KEYFILE)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			// TODO: Output instructions for generating a local cert
+			log.Fatalf("Certificate or key file not found: %v", err)
+		}
+		log.Fatalf("Invalid TLS configuration (malformed certificate or key): %v", err)
+	}
+
 	log.Println("Server starting on", SERVER_PORT)
-	err = http.ListenAndServeTLS(SERVER_PORT, "server.crt", "server.key", mux)
+	err = http.ListenAndServeTLS(SERVER_PORT, CERTFILE, KEYFILE, mux)
 	if err != nil {
 		log.Fatal(err)
 	}
