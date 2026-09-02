@@ -17,6 +17,9 @@ const SERVER_PORT = ":9003"
 const TPL_OPEN = "<?= "
 const TPL_CLOSE = " ?>"
 
+//go:embed static/*
+var staticFiles embed.FS
+
 //go:embed templates/pages/*
 var tplPagesFiles embed.FS
 var tplPages = make(map[string]*fasttemplate.Template)
@@ -80,6 +83,12 @@ func init() {
 }
 
 func main() {
+	subFS, err := fs.Sub(staticFiles, "static")
+	if err != nil {
+		log.Fatal(err)
+	}
+	http.Handle("/static/", http.StripPrefix("/static", http.FileServer(http.FS(subFS))))
+
 	http.HandleFunc("/", handleHubAtRoot)
 	http.HandleFunc("/navigation", handleNavigationPage)
 
