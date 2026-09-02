@@ -83,17 +83,24 @@ func init() {
 }
 
 func main() {
+	mux := http.NewServeMux()
+
 	subFS, err := fs.Sub(staticFiles, "static")
 	if err != nil {
 		log.Fatal(err)
 	}
-	http.Handle("/static/", http.StripPrefix("/static", http.FileServer(http.FS(subFS))))
+	mux.Handle("/static/", http.StripPrefix("/static", http.FileServer(http.FS(subFS))))
 
-	http.HandleFunc("/", handleHubAtRoot)
-	http.HandleFunc("/navigation", handleNavigationPage)
+	mux.HandleFunc("/", handleHubAtRoot)
+	mux.HandleFunc("/navigation", handleNavigationPage)
 
+	// Use mkcert for a trusted local cert
+	// https://github.com/filosottile/mkcert
+	//
+	// Use http/2 by default
 	log.Println("Server starting on", SERVER_PORT)
-	if err := http.ListenAndServe(SERVER_PORT, nil); err != nil {
+	err = http.ListenAndServeTLS(SERVER_PORT, "server.crt", "server.key", mux)
+	if err != nil {
 		log.Fatal(err)
 	}
 }
@@ -112,14 +119,14 @@ func handleNavigationPage(w http.ResponseWriter, r *http.Request) {
 
 	navigationPage, ok := tplPages["navigation"]
 	if !ok {
-		slog.Error("Could not find component: navigation")
+		slog.Error("Could not find page: navigation")
 		http.Error(w, "Could not find page: navigation", 500)
 		return
 	}
 
 	baseLayout, ok := tplLayouts["base"]
 	if !ok {
-		slog.Error("Could not find component: base")
+		slog.Error("Could not find layout: base")
 		http.Error(w, "Could not find layout: base", 500)
 		return
 	}
