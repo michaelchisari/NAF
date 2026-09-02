@@ -18,15 +18,15 @@ const TPL_CLOSE = " ?>"
 
 //go:embed templates/pages/*
 var tplPagesFiles embed.FS
-var tplPages = make(map[string]string)
+var tplPages = make(map[string]*fasttemplate.Template)
 
 //go:embed templates/components/*
 var tplComponentsFiles embed.FS
-var tplComponents = make(map[string]string)
+var tplComponents = make(map[string]*fasttemplate.Template)
 
 //go:embed templates/layouts/*
 var tplLayoutsFiles embed.FS
-var tplLayouts = make(map[string]string)
+var tplLayouts = make(map[string]*fasttemplate.Template)
 
 func init() {
 	// Pages
@@ -42,7 +42,7 @@ func init() {
 		}
 		p := path.Base(pagePath)
 		i := strings.TrimSuffix(p, ".html")
-		tplPages[i] = string(pageContent)
+		tplPages[i] = fasttemplate.New(string(pageContent), TPL_OPEN, TPL_CLOSE)
 	}
 
 	// Components
@@ -58,8 +58,7 @@ func init() {
 		}
 		p := path.Base(componentPath)
 		i := strings.TrimSuffix(p, ".html")
-		fmt.Println("INDEX:", i)
-		tplComponents[i] = string(componentContent)
+		tplComponents[i] = fasttemplate.New(string(componentContent), TPL_OPEN, TPL_CLOSE)
 	}
 
 	// Layouts
@@ -75,8 +74,7 @@ func init() {
 		}
 		p := path.Base(layoutPath)
 		i := strings.TrimSuffix(p, ".html")
-		fmt.Println("INDEX:", i)
-		tplLayouts[i] = string(layoutContent)
+		tplLayouts[i] = fasttemplate.New(string(layoutContent), TPL_OPEN, TPL_CLOSE)
 	}
 }
 
@@ -99,13 +97,13 @@ func handleNavigationPage(w http.ResponseWriter, r *http.Request) {
 	navigationPage := tplPages["navigation"]
 	baseLayout := tplLayouts["base"]
 
-	t := fasttemplate.New(navigationPage, TPL_OPEN, TPL_CLOSE)
-	n := t.ExecuteString(map[string]any{
-		"header_nav": headerNavComponent,
+	h := headerNavComponent.ExecuteString(map[string]any{})
+
+	n := navigationPage.ExecuteString(map[string]any{
+		"header_nav": h,
 	})
 
-	t = fasttemplate.New(baseLayout, TPL_OPEN, TPL_CLOSE)
-	b := t.ExecuteString(map[string]any{
+	b := baseLayout.ExecuteString(map[string]any{
 		"page": n,
 	})
 
