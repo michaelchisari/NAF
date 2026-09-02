@@ -93,9 +93,23 @@ func handleHubAtRoot(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleNavigationPage(w http.ResponseWriter, r *http.Request) {
-	headerNavComponent := tplComponents["header_nav"]
-	navigationPage := tplPages["navigation"]
-	baseLayout := tplLayouts["base"]
+	headerNavComponent, ok := tplComponents["header_nav"]
+	if !ok {
+		fmt.Fprint(w, "Could not find component: header_nav")
+		return
+	}
+
+	navigationPage, ok := tplPages["navigation"]
+	if !ok {
+		fmt.Fprint(w, "Could not find component: navigation")
+		return
+	}
+
+	baseLayout, ok := tplLayouts["base"]
+	if !ok {
+		fmt.Fprint(w, "Could not find layout: base")
+		return
+	}
 
 	h := headerNavComponent.ExecuteString(map[string]any{})
 
