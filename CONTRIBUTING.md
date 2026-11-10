@@ -11,3 +11,5 @@ Don't use LLMs to write your code. You can use it for planning and analysis, whi
 Bug reports should be descriptive, with clear steps to reproduce.
 
 Be respectful. We're all volunteers here.
+
+## Developer Environment Setup

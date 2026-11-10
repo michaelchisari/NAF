@@ -16,9 +16,11 @@ import (
 	"github.com/valyala/fasttemplate"
 )
 
-const SERVER_PORT = ":9003"
-const TPL_OPEN = "<?= "
-const TPL_CLOSE = " ?>"
+const (
+	SERVER_PORT = ":9003"
+	TPL_OPEN    = "<?= "
+	TPL_CLOSE   = " ?>"
+)
 
 //go:embed static/*
 var staticFiles embed.FS

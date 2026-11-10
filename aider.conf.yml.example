@@ -1,4 +1,4 @@
 model: ollama/qwen3.8:latest
 read:
-  - AIDER.md
+  - AGENTS.md
 chat-mode: ask
